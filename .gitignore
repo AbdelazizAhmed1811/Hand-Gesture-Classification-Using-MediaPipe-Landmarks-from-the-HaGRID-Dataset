@@ -1,3 +1,25 @@
 commands.txt
 task.txt
 requirements.txt
+helpers/
+
+Project Description.pdf
+videos/output/output_rf0.mp4
+videos/output/output_svm0.mp4
+videos/output/output_knn0.mp4
+videos/input/input_video1.mp4
+videos/input/input_video-02.mp4
+videos/input/input_video-01.mp4
+__pycache__/process_video.cpython-313.pyc
+__pycache__/utility.cpython-313.pyc
+videos/input/input_video0.mp4
+videos/input/input_video-04.mp4
+videos/input/input_video-05.mp4
+videos/input/input_video-06.mp4
+videos/output/input_video-05_knn.mp4
+videos/output/input_video-05_rf.mp4
+videos/output/input_video-05_svm.mp4
+videos/output/input_video-06_knn.mp4
+videos/output/input_video-06_rf.mp4
+videos/output/input_video-06_svm.mp4
+videos/input/input_video-03.mp4
