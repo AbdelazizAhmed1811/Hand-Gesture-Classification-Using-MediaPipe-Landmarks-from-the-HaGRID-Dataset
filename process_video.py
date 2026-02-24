@@ -13,11 +13,12 @@ Usage:
     ./hand_gesture/bin/python process_video.py
 """
 
-import cv2
-import numpy as np
-import joblib
-import sys
 import os
+import sys
+import cv2
+import joblib
+import numpy as np
+import pandas as pd
 import subprocess
 from collections import deque, Counter
 
@@ -32,13 +33,16 @@ from mediapipe.tasks.python.vision.hand_landmarker import (
 
 from utility import normalize_landmarks_row
 
+
+FEATURE_NAMES = [f"{axis}{i}" for i in range(1, 22) for axis in ('x', 'y', 'z')]
+
 HAND_CONNECTIONS = [
     (c.start, c.end) for c in HandLandmarksConnections.HAND_CONNECTIONS
 ]
 
 MODEL_FILES = {
-    "KNN": "models/knn_best_model.joblib",
-    "SVM": "models/svm_best_model.joblib",
+    # "KNN": "models/knn_best_model.joblib",
+    # "SVM": "models/svm_best_model.joblib",
     "RF":  "models/random_forest_best_model.joblib",
 }
 
@@ -52,9 +56,9 @@ def convert_to_h264(input_path: str) -> None:
     cmd = [
         "ffmpeg", "-y", "-i", input_path,
         "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-        "-pix_fmt", "yuv420p",   # required for browser playback
-        "-movflags", "+faststart",  # enables progressive download
-        "-an",   # no audio
+        "-pix_fmt", "yuv420p",   
+        "-movflags", "+faststart",  
+        "-an", 
         tmp_path,
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -103,7 +107,6 @@ def process_single_model(
     output_path: str,
     model_name: str,
     model,
-    label_encoder,
     landmarker_model: str,
 ) -> None:
     """Process a video with a single model and write the output."""
@@ -114,7 +117,7 @@ def process_single_model(
         num_hands=1,
         min_hand_detection_confidence=0.7,
         min_hand_presence_confidence=0.7,
-        min_tracking_confidence=0.7,
+        min_tracking_confidence=0.5,
     )
     landmarker = HandLandmarker.create_from_options(options)
 
@@ -162,9 +165,11 @@ def process_single_model(
                     landmark_row.extend([lm.x, lm.y, lm.z])
 
                 X_pred = normalize_landmarks_row(landmark_row).reshape(1, -1)
+                
+                X_pred_df = pd.DataFrame(X_pred, columns=FEATURE_NAMES)
 
                 try:
-                    pred = model.predict(X_pred)[0]
+                    pred = model.predict(X_pred_df)[0]
                     prediction_window.append(str(pred))
                 except Exception as exc:
                     prediction_window.append("Error")
@@ -214,11 +219,6 @@ def process_video(
         print(f"Error: hand landmarker model not found at '{landmarker_model}'")
         sys.exit(1)
 
-    le = None
-    if os.path.isfile("label_encoder.joblib"):
-        le = joblib.load("label_encoder.joblib")
-        print(f"  Loaded label encoder ({len(le.classes_)} classes)")
-
     models: dict = {}
     for name, path in MODEL_FILES.items():
         if not os.path.isfile(path):
@@ -232,8 +232,8 @@ def process_video(
         sys.exit(1)
 
     output_files = {
-        "KNN": "videos/output/output_knn.mp4",
-        "SVM": "videos/output/output_svm.mp4",
+        # "KNN": "videos/output/output_knn.mp4",
+        # "SVM": "videos/output/output_svm.mp4",
         "RF":  "videos/output/output_rf.mp4",
     }
 
@@ -253,7 +253,3 @@ def process_video(
     for name in models:
         print(f"    • {output_files[name]}")
     print(f"{'=' * 60}")
-
-
-if __name__ == "__main__":
-    process_video()

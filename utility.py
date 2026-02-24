@@ -13,83 +13,110 @@ import numpy as np
 
 # ── DataFrame-level normalization (used during training) ────────────────
 
+
 def normalize_landmarks_df(df):
     """
-    Normalize hand landmark coordinates to be translation- and scale-invariant.
-
-    Steps
-    -----
-    1. Center all landmarks relative to the wrist (landmark 1).
-    2. Scale by the max absolute coordinate value so all values ∈ [-1, 1].
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame with columns x1..x21, y1..y21, z1..z21, and 'label'.
-
-    Returns
-    -------
-    pd.DataFrame
-        Normalized DataFrame with the same structure.
+    Normalize hand landmark coordinates to match LandmarkNormalizer logic.
+    - Centers (x, y) relative to the wrist (landmark 1).
+    - Scales (x, y) by the distance to the middle finger tip (landmark 13).
+    - Z coordinates are left untouched.
     """
     df_norm = df.copy()
 
     x_cols = [f"x{i}" for i in range(1, 22)]
     y_cols = [f"y{i}" for i in range(1, 22)]
-    z_cols = [f"z{i}" for i in range(1, 22)]
 
-    # Step 1: Center on the wrist (landmark 1)
     df_norm[x_cols] = df_norm[x_cols].subtract(df_norm["x1"], axis=0)
     df_norm[y_cols] = df_norm[y_cols].subtract(df_norm["y1"], axis=0)
-    df_norm[z_cols] = df_norm[z_cols].subtract(df_norm["z1"], axis=0)
 
-    # Step 2: Scale to [-1, 1] per sample
-    all_landmark_cols = x_cols + y_cols + z_cols
-    max_abs = df_norm[all_landmark_cols].abs().max(axis=1)
-    max_abs = max_abs.replace(0, 1)  # avoid division by zero
-    df_norm[all_landmark_cols] = df_norm[all_landmark_cols].div(max_abs, axis=0)
+
+    scale_factor = np.sqrt(df_norm["x13"]**2 + df_norm["y13"]**2)
+    
+    scale_factor = scale_factor.replace(0, 1) 
+
+    df_norm[x_cols] = df_norm[x_cols].div(scale_factor, axis=0)
+    df_norm[y_cols] = df_norm[y_cols].div(scale_factor, axis=0)
 
     return df_norm
 
 
-# ── Single-row normalization (used during video inference) ──────────────
+
 
 def normalize_landmarks_row(landmark_row: list[float]) -> np.ndarray:
     """
-    Normalize a single flat list of 63 landmark values (x1,y1,z1, … ,x21,y21,z21).
-
-    Uses the exact same algorithm as :func:`normalize_landmarks_df`:
-    center on wrist (indices 0,1,2) then scale to [-1, 1].
-
-    Parameters
-    ----------
-    landmark_row : list[float]
-        Flat list of 63 floats in [x1, y1, z1, x2, y2, z2, …] order.
-
-    Returns
-    -------
-    np.ndarray
-        Shape (63,) with normalized values.
+    Normalize a single flat list of 63 landmark values.
+    Matches LandmarkNormalizer logic: Centers and scales ONLY X and Y.
     """
     arr = np.array(landmark_row, dtype=np.float64)
-    wrist_x, wrist_y, wrist_z = arr[0], arr[1], arr[2]
 
     xs = arr[0::3]
     ys = arr[1::3]
-    zs = arr[2::3]
+
+    wrist_x = xs[0]
+    wrist_y = ys[0]
 
     xs -= wrist_x
     ys -= wrist_y
-    zs -= wrist_z
 
-    all_coords = np.concatenate([xs, ys, zs])
-    max_abs = np.max(np.abs(all_coords))
-    if max_abs > 0:
-        xs /= max_abs
-        ys /= max_abs
-        zs /= max_abs
+
+    scale_factor = np.linalg.norm([xs[12], ys[12]])
+    
+    if scale_factor > 0:
+        xs /= scale_factor
+        ys /= scale_factor
+
 
     arr[0::3] = xs
     arr[1::3] = ys
-    arr[2::3] = zs
+    
     return arr
+
+
+
+
+
+HAND_CONNECTIONS = [
+    (0, 1), (1, 2), (2, 3), (3, 4),       # Thumb
+    (0, 5), (5, 6), (6, 7), (7, 8),       # Index finger
+    (0, 9), (9, 10), (10, 11), (11, 12),   # Middle finger
+    (0, 13), (13, 14), (14, 15), (15, 16), # Ring finger
+    (0, 17), (17, 18), (18, 19), (19, 20), # Pinky
+    (5, 9), (9, 13), (13, 17)              # Palm
+]
+
+
+FINGER_COLORS = {
+    'thumb':  '#FF6B6B',   
+    'index':  '#4ECDC4',   
+    'middle': '#45B7D1',   
+    'ring':   '#96CEB4',   
+    'pinky':  '#FFEAA7',   
+    'palm':   '#DDA0DD'    
+}
+
+
+def plot_hand_landmarks(row, ax, title=''):
+    xs = []
+    ys = []
+
+    for i in range(1, 22):
+        xs.append(row[f'x{i}'])
+        ys.append(row[f'y{i}'])
+
+    # Draw connections
+    for (i, j) in HAND_CONNECTIONS:
+        ax.plot([xs[i], xs[j]], [ys[i], ys[j]], linewidth=2, alpha=0.8)
+
+    # Draw landmark points
+    ax.scatter(xs, ys, c='white', edgecolors='black',
+               s=40, zorder=5, linewidths=1)
+
+    # Highlight wrist and fingertips
+    tips = [0, 4, 8, 12, 16, 20]
+    ax.scatter([xs[t] for t in tips], [ys[t] for t in tips],
+               c='#FF4757', edgecolors='black', s=70, zorder=6, linewidths=1)
+
+    ax.set_title(title, fontsize=13, fontweight='bold')
+    ax.invert_yaxis()  
+    ax.set_aspect('equal')
+    ax.axis('off')
