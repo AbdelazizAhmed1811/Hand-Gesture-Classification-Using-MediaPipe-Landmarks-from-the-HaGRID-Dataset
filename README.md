@@ -20,8 +20,6 @@ A machine learning pipeline for **real-time hand gesture classification** using 
 - [Usage](#usage)
 - [Model Performance](#model-performance)
 - [Video Inference](#video-inference)
-- [Key Findings](#key-findings)
-
 ---
 
 ## Overview
@@ -135,40 +133,18 @@ This produces browser-compatible MP4 videos in `videos/output/` with stabilized 
 
 | Model | Accuracy | Precision | Recall | F1-Score |
 |-------|----------|-----------|--------|----------|
-| KNN | 97.96% | 97.97% | 97.96% | 97.96% |
-| **SVM** | **98.54%** | **98.51%** | **98.51%** | **98.51%** |
-| Random Forest | 97.82% | 97.82% | 97.83% | 97.82% |
+| KNN | 97.74% | 97.73% | 97.73% | 97.72% |
+| SVM | 97.82% | 97.81% | 97.82% | 97.80% |
+| **Random Forest** | **97.88%** | **97.84%** | **97.85%** | **97.84%** |
 
 > All metrics are macro-averaged across 18 classes.
-
----
 
 ## Video Inference
 
 Predictions are **stabilized** using a rolling-window mode filter (15 frames), eliminating per-frame flickering. Output videos use H.264 encoding for browser compatibility.
 
 Each model generates its own output video:
-- `output_knn.mp4`
-- `output_svm.mp4`
 - `output_rf.mp4`
-
----
-
-## Key Findings
-
-- **All models exceed 97.8%** on the test set, confirming MediaPipe landmarks are excellent features for gesture classification.
-- **Challenging class pairs:** `stop` vs. `palm` and `peace` vs. `two_up` are frequently confused due to similar hand geometry.
-- **Test metrics ≠ real-world performance:** Distribution shift, landmark noise, and temporal ambiguity cause occasional misclassifications during video inference.
-- **Recommendation: Random Forest** — Despite SVM achieving the highest test-set scores, Random Forest shows better practical generalization, noise robustness, and interpretability during real-world video deployment.
-
-### Normalization
-
-All landmarks are normalized using a shared function in [`utility.py`](utility.py):
-
-1. **Center** on wrist (landmark 0) — removes positional bias
-2. **Scale** to [-1, 1] — removes hand-size variance
-
-The same normalization is used during both training and inference, ensuring consistency.
 
 ---
 
