@@ -192,7 +192,7 @@ def run_tuning_mlflow(experiment_name, run_name, X_train, y_train, model, param_
         results = []
 
         for i, params in enumerate(param_list):
-            trial_name = f"Trial_{i+1}"
+            trial_name = f"{run_name}_Trial_{i+1}"
             print(f"Running {trial_name} with params: {params}")
             
             with mlflow.start_run(run_name=trial_name, nested=True) as child_run:
