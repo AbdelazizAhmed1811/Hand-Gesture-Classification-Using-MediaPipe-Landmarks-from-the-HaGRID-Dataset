@@ -1,6 +1,0 @@
-kernel,gamma,C,mean_test_score
-linear,auto,10.0,0.8814508276533592
-rbf,scale,10.0,0.9820837390457644
-linear,scale,0.1,0.7802336903602726
-linear,scale,10.0,0.8814508276533592
-rbf,scale,1.0,0.9603213242453748

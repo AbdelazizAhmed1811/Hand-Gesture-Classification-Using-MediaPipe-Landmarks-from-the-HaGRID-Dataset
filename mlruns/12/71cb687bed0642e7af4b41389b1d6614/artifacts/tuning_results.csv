@@ -1,6 +1,0 @@
-weights,n_neighbors,metric,mean_test_score
-uniform,3,euclidean,0.9764362220058423
-distance,9,manhattan,0.9702044790652387
-distance,7,manhattan,0.9705939629990263
-distance,3,euclidean,0.9764362220058423
-uniform,11,euclidean,0.9713242453748784

@@ -1,0 +1,33 @@
+artifact_path: /home/zizo/iti/ML-01/project/mlruns/1/models/m-061c6142d7f344149feae30f8ce2d3ed/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.12
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.10.0
+model_id: m-061c6142d7f344149feae30f8ce2d3ed
+model_size_bytes: 3491629
+model_uuid: m-061c6142d7f344149feae30f8ce2d3ed
+prompts: null
+run_id: f636c514ecc9425d81605691b4a15f16
+saved_input_example_info:
+  artifact_path: input_example.json
+  serving_input_path: serving_input_example.json
+  type: ndarray
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1, 63]}}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-02-26 22:48:50.569025'

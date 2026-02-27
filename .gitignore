@@ -1,6 +1,11 @@
 commands.txt
 task.txt
-requirements.txt
 remove_runs.py
 remove_runs_from_db.py
 Project Description.pdf
+screenshots/Example_model_artifacts.png
+screenshots/Example_model.png
+screenshots/Experiment_name.png
+screenshots/Experiment_parent_runs.png
+screenshots/Experiment_runs.png
+screenshots/Model_register_&_versions.png
