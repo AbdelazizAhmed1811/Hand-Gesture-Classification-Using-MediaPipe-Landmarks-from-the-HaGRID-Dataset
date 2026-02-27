@@ -24,13 +24,27 @@ The project utilizes the **HaGRID** dataset, a large-scale collection of hand ge
 
 Each sample consists of **63 features** (21 landmarks × 3 coordinates: x, y, z).
 
-## Model Selection: Random Forest
-After evaluating several architectural approaches, **Random Forest** was selected as the primary classifier for this project.
+## 📊 Model Performance & Selection
 
-### Why Random Forest?
-The choice of Random Forest is justified by its exceptional **robustness** and **reliability** in handling landmark-based geometric data:
-1.  **Robustness to Outliers**: Hand landmark data can occasionally contain noise due to occlusions or MediaPipe tracking errors. Random Forest's ensemble nature (Bagging) prevents individual noisy trees from significantly impacting the final prediction.
-2.  **Reliability & Generalization**: By averaging multiple decision trees, the model significantly reduces the risk of overfitting, ensuring it generalizes well to new users and different camera angles.
+To ensure the highest accuracy and reliability, we evaluated three distinct architectural approaches. All models underwent rigorous hyperparameter tuning using **MLflow** and cross-validation.
+
+### Comparison Table
+| Model | Accuracy | Precision | Recall | F1-Score | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **KNN** | `97.6%` | `98%` | `98%` | `98%` | 🟦 Candidate |
+| **SVM** | `97.7%` | `98%` | `98%` | `98%` | 🟩 Candidate |
+| **Random Forest** | `97.6%` | `98%` | `98%` | `98%` | 🏆 **Selected** |
+
+---
+
+### 🏆 Why Random Forest?
+While all models exhibit near-identical performance metrics, **Random Forest** was selected as the production model due to its exceptional **robustness** and **operational reliability**:
+
+> [!IMPORTANT]
+> **Outlier Resistance**: Hand landmark detection can occasionally suffer from jitter or tracking errors. Random Forest's ensemble nature effectively filters out these anomalies, providing significantly more stable predictions than single-point models.
+
+- **Superior Generalization**: The bagging technique used avoids overfitting to specific hand sizes or camera distances found in the training set.
+- **Production Ready**: It offers the best balance between low-latency inference and high-confidence results across diverse datasets.
 
 ## Installation & Setup
 1.  **Clone the Repository**:
